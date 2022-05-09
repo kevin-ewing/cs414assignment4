@@ -2,3 +2,4 @@
 fs-find
 fs-cat
 *.core
+auto-perm-change.sh
