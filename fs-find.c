@@ -54,7 +54,10 @@ main(int argc, char *argv[])
     printf("ino_to_cg(superblock, UFS_ROOTINO) = %d\n", ino_to_cg(superblock, UFS_ROOTINO));
     printf("ino_to_fsba(superblock, UFS_ROOTINO) = %d\n", ino_to_fsba(superblock, UFS_ROOTINO));
     printf("ino_to_fsbo(superblock, UFS_ROOTINO) = %d\n\n", ino_to_fsbo(superblock, UFS_ROOTINO));
-    printf("superblock->fs_cgsize = %d\n\n", superblock->fs_cgsize);
+    
+    printf("superblock->fs_cgsize = %d\n", superblock->fs_cgsize);
+    printf("superblock->fs_bsize = %d\n", superblock->fs_bsize);
+    printf("superblock->fs_fsize = %d\n", superblock->fs_fsize);
     
     
     printf("Root inode = %x\n", root_inode); 
