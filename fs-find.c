@@ -48,20 +48,28 @@ main(int argc, char *argv[])
 
     printf("Disk start = %x\n", disk_map);
     printf("Superblock = %x\n", superblock);
-    printf("Mount point = %s\n\n", superblock->fs_fsmnt);
+    printf("Mount point = %s\n", superblock->fs_fsmnt);
 
-    root_inode = (struct ufs2_dinode *) (disk_map + ino_to_cg(superblock, UFS_ROOTINO) + (ino_to_fsba(superblock, UFS_ROOTINO) * MINBSIZE) + (ino_to_fsbo(superblock, UFS_ROOTINO) * 512));
-    printf("ino_to_cg(superblock, UFS_ROOTINO) = %d\n", ino_to_cg(superblock, UFS_ROOTINO));
-    printf("ino_to_fsba(superblock, UFS_ROOTINO) = %d\n", ino_to_fsba(superblock, UFS_ROOTINO));
-    printf("ino_to_fsbo(superblock, UFS_ROOTINO) = %d\n\n", ino_to_fsbo(superblock, UFS_ROOTINO));
-    
+    printf("\n");
+
     printf("superblock->fs_cgsize = %d\n", superblock->fs_cgsize);
     printf("superblock->fs_bsize = %d\n", superblock->fs_bsize);
-    printf("superblock->fs_fsize = %d\n", superblock->fs_fsize);
+    printf("superblock->fs_fmsize = %d\n", superblock->fs_fsize);
+
+    printf("\n");
+
+    printf("ino_to_cg(superblock, UFS_ROOTINO) = %d\n", ino_to_cg(superblock, UFS_ROOTINO));
+    printf("ino_to_fsba(superblock, UFS_ROOTINO) = %d\n", ino_to_fsba(superblock, UFS_ROOTINO));
+    printf("ino_to_fsbo(superblock, UFS_ROOTINO) = %d\n", ino_to_fsbo(superblock, UFS_ROOTINO));
+    printf("cgdata(superblock, ino_to_cg(superblock, UFS_ROOTINO)) = %d\n", cgdata(superblock, ino_to_cg(superblock, UFS_ROOTINO)));
+    printf("cgbase(superblock, ino_to_cg(superblock, UFS_ROOTINO)) = %d\n", cgdata(superblock, ino_to_cg(superblock, UFS_ROOTINO)));
+
+    printf("superblock->fs_iblkno = %d\n", superblock->fs_iblkno);
+    printf("\n");
     
-    
-    printf("Root inode = %x\n", root_inode); 
-    printf("Root inode di_nlink = %d\n", root_inode->di_nlink);
-    printf("Root inode di_atime = %d\n", root_inode->di_atime);
-    printf("Root inode di_size = %d\n", root_inode->di_size);
+    // root_inode = (struct ufs2_dinode *) (disk_map + cgdata(superblock, ino_to_cg(superblock, UFS_ROOTINO)) + (ino_to_fsba(superblock, UFS_ROOTINO) * MINBSIZE) + (ino_to_fsbo(superblock, UFS_ROOTINO) * 512));
+    // printf("Root inode = %x\n", root_inode); 
+    // printf("Root inode di_nlink = %d\n", root_inode->di_nlink);
+    // printf("Root inode di_atime = %d\n", root_inode->di_atime);
+    // printf("Root inode di_size = %d\n", root_inode->di_size);
 }
