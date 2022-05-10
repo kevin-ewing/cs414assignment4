@@ -14,6 +14,11 @@
 #include "/usr/src/sys/ufs/ufs/dinode.h"
 #include "/usr/src/sys/ufs/ufs/dir.h"
 
+
+
+long inode_to_offset(struct fs *superblock, int inode_num);
+
+
 int
 main(int argc, char *argv[])
 {
@@ -46,33 +51,33 @@ main(int argc, char *argv[])
     
     superblock = (struct fs *) (disk_map + SBLOCK_UFS2);
 
-    printf("Disk start = %x\n", disk_map);
-    printf("Superblock = %x\n", superblock);
-    printf("Mount point = %s\n", superblock->fs_fsmnt);
-
-    printf("\n");
-
-    printf("Cylinder group size = %d\n", superblock->fs_cgsize);
-    printf("Block size = %d\n", superblock->fs_bsize);
-    printf("Fragment size = %d\n", superblock->fs_fsize);
-
     printf("\n");
 
     printf("inode number to cylinder group number = %d\n", ino_to_cg(superblock, UFS_ROOTINO));
     printf("inode number to filesystem block address = %d\n", ino_to_fsba(superblock, UFS_ROOTINO));
     printf("inode number to filesystem block offset = %d\n", ino_to_fsbo(superblock, UFS_ROOTINO));
-    printf("Cylinder group base zone = %d\n", cgbase(superblock, 1));
+    printf("Cylinder group base zone = %d\n", cgbase(superblock, UFS_ROOTINO));
 
     printf("\n ________________________________________\n\n");
-    long cylinder_offset = cgbase(superblock, ino_to_cg(superblock, UFS_ROOTINO));
+    long cylinder_offset = cgbase(superblock, ino_to_cg(superblock, UFS_ROOTINO)) * superblock->fs_bsize;
     long total_block_offset = (ino_to_fsba(superblock, UFS_ROOTINO) * superblock->fs_bsize) + (ino_to_fsbo(superblock, UFS_ROOTINO) * superblock->fs_fsize);
     long total_disk_offset = cylinder_offset + total_block_offset;
 
-    root_inode = (struct ufs2_dinode *) (total_disk_offset + disk_map);
+
+
+    root_inode = (struct ufs2_dinode *) (inode_to_offset(superblock, UFS_ROOTINO) + disk_map);
 
     printf("Root inode = %x\n", root_inode); 
-    printf("Root inode offset from disk = %x\n", (char *) root_inode - disk_map); 
     printf("Root inode di_nlink = %d\n", root_inode->di_nlink);
     printf("Root inode di_atime = %d\n", root_inode->di_atime);
     printf("Root inode di_size = %d\n", root_inode->di_size);
+}
+
+
+long
+inode_to_offset(struct fs *superblock, int inode_num){
+    long total_block_offset = ((ino_to_fsba(superblock, UFS_ROOTINO) * superblock->fs_fsize) + (ino_to_fsbo(superblock, UFS_ROOTINO) * sizeof(struct ufs2_dinode)));
+
+    printf("total_disk_offset = %x\n", total_block_offset);
+    return total_block_offset;
 }
