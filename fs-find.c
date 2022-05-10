@@ -64,13 +64,14 @@ main(int argc, char *argv[])
     printf("Cylinder group base zone = %d\n", cgbase(superblock, 1));
 
     printf("\n ________________________________________\n\n");
-    int cylinder_offset = cgbase(superblock, ino_to_cg(superblock, UFS_ROOTINO));
-    int total_block_offset = (ino_to_fsba(superblock, UFS_ROOTINO) * superblock->fs_bsize) + (ino_to_fsbo(superblock, UFS_ROOTINO) * superblock->fs_fsize);
-    int total_disk_offset = cylinder_offset + total_block_offset;
+    long cylinder_offset = cgbase(superblock, ino_to_cg(superblock, UFS_ROOTINO));
+    long total_block_offset = (ino_to_fsba(superblock, UFS_ROOTINO) * superblock->fs_bsize) + (ino_to_fsbo(superblock, UFS_ROOTINO) * superblock->fs_fsize);
+    long total_disk_offset = cylinder_offset + total_block_offset;
 
-    root_inode = (struct ufs2_dinode *) total_disk_offset;
+    root_inode = (struct ufs2_dinode *) (total_disk_offset + disk_map);
 
     printf("Root inode = %x\n", root_inode); 
+    printf("Root inode offset from disk = %x\n", (char *) root_inode - disk_map); 
     printf("Root inode di_nlink = %d\n", root_inode->di_nlink);
     printf("Root inode di_atime = %d\n", root_inode->di_atime);
     printf("Root inode di_size = %d\n", root_inode->di_size);
