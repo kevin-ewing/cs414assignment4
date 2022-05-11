@@ -17,7 +17,7 @@
 
 
 long inode_to_offset(struct fs *superblock, int inode_num);
-
+int is_inode_dir(struct ufs2_dinode * inode);
 
 int
 main(int argc, char *argv[])
@@ -40,8 +40,6 @@ main(int argc, char *argv[])
         perror("stat");
     }
     file_size = st.st_size;
-
-    printf("File size: %d\n", file_size);
     
     disk_map = mmap(0, file_size, PROT_READ, MAP_SHARED, fd, 0);
     if(disk_map == MAP_FAILED){
@@ -50,34 +48,21 @@ main(int argc, char *argv[])
     }
     
     superblock = (struct fs *) (disk_map + SBLOCK_UFS2);
-
-    printf("\n");
-
-    printf("inode number to cylinder group number = %d\n", ino_to_cg(superblock, UFS_ROOTINO));
-    printf("inode number to filesystem block address = %d\n", ino_to_fsba(superblock, UFS_ROOTINO));
-    printf("inode number to filesystem block offset = %d\n", ino_to_fsbo(superblock, UFS_ROOTINO));
-    printf("Cylinder group base zone = %d\n", cgbase(superblock, UFS_ROOTINO));
-
-    printf("\n ________________________________________\n\n");
-    long cylinder_offset = cgbase(superblock, ino_to_cg(superblock, UFS_ROOTINO)) * superblock->fs_bsize;
-    long total_block_offset = (ino_to_fsba(superblock, UFS_ROOTINO) * superblock->fs_bsize) + (ino_to_fsbo(superblock, UFS_ROOTINO) * superblock->fs_fsize);
-    long total_disk_offset = cylinder_offset + total_block_offset;
-
-
-
     root_inode = (struct ufs2_dinode *) (inode_to_offset(superblock, UFS_ROOTINO) + disk_map);
 
     printf("Root inode = %x\n", root_inode); 
     printf("Root inode di_nlink = %d\n", root_inode->di_nlink);
     printf("Root inode di_atime = %d\n", root_inode->di_atime);
     printf("Root inode di_size = %d\n", root_inode->di_size);
+    printf("Is it a directory = %s\n", is_inode_dir(root_inode) ? "true" : "false");
 }
-
 
 long
 inode_to_offset(struct fs *superblock, int inode_num){
-    long total_block_offset = ((ino_to_fsba(superblock, UFS_ROOTINO) * superblock->fs_fsize) + (ino_to_fsbo(superblock, UFS_ROOTINO) * sizeof(struct ufs2_dinode)));
+    return ((ino_to_fsba(superblock, inode_num) * superblock->fs_fsize) + (ino_to_fsbo(superblock, inode_num) * sizeof(struct ufs2_dinode)));
+}
 
-    printf("total_disk_offset = %x\n", total_block_offset);
-    return total_block_offset;
+int
+is_inode_dir(struct ufs2_dinode * inode){
+    return (inode->di_mode & IFMT) == IFDIR;
 }
