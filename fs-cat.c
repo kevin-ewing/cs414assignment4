@@ -19,6 +19,7 @@
 long inode_to_offset(struct fs *superblock, int inode_num);
 int is_inode_dir(struct ufs2_dinode * inode);
 int dps_find(struct ufs2_dinode * inode, char * disk_offset, struct fs *superblock, char * comp_string);
+void write_file(struct ufs2_dinode * inode, struct fs * superblock, char * disk_offset);
 
 int
 main(int argc, char *argv[])
@@ -62,9 +63,12 @@ main(int argc, char *argv[])
     }
 
     struct ufs2_dinode *file_ino = (struct ufs2_dinode *)(inode_to_offset(superblock, file_ino_num) + disk_offset);
-    char* content = (char *)((file_ino->di_db[0] * superblock->fs_fsize) + disk_offset);
 
-    printf("%s\n", content);
+    write_file(file_ino, superblock, disk_offset);
+
+    // char* content = (char *)((file_ino->di_db[0] * superblock->fs_fsize) + disk_offset);
+
+    // printf("%s\n", content);
 }
 
 long
@@ -122,4 +126,28 @@ dps_find(struct ufs2_dinode * inode, char * disk_offset, struct fs *superblock, 
 
     // didn't find anything, return -1.
     return -1;
+}
+
+void 
+write_file(struct ufs2_dinode * inode, struct fs * superblock, char * disk_offset){
+    char * file_offset = 0;
+    int db_index = 0;
+    int check_write;
+
+    while (file_offset + superblock->fs_bsize < (char * ) inode->di_size){
+        check_write = write(1, (char *)((inode->di_db[db_index] * superblock->fs_fsize) + disk_offset), superblock->fs_bsize);
+        if (check_write == -1){
+            perror("write");
+            exit(-1);
+        }
+
+        db_index += 1;
+        file_offset += superblock->fs_bsize;
+    }
+    check_write = write(1, (char *)((inode->di_db[db_index] * superblock->fs_fsize) + disk_offset), (char *) inode->di_size -  file_offset);
+    if (check_write == -1){
+        perror("write");
+        exit(-1);
+    }
+
 }
