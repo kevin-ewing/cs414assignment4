@@ -1,0 +1,58 @@
+Argv2 dir1/dir1.1/file2
+temp_name = dir1
+f1
+f1
+f2
+f3
+comp_string: dir1.1/file2
+f1
+f2
+temp_name = dir1.1
+f1
+f1
+f2
+temp_name = file2
+f1
+f1
+f2
+f3
+comp_string: (null)
+f3
+comp_string: file2
+f1
+f2
+f3
+comp_string: file2
+f1
+f2
+f3
+comp_string: file2
+f3
+comp_string: dir1.1
+f1
+f2
+f3
+comp_string: dir1.1
+f1
+f2
+f3
+comp_string: dir1.1
+f1
+f2
+f3
+comp_string: dir1.1
+f1
+f2
+f3
+comp_string: dir1.1
+f1
+f2
+f3
+comp_string: dir1.1
+f1
+f2
+f3
+comp_string: dir1.1
+Argv2 dir1
+Files Inode = 512
+file_ino->di_mtime 0

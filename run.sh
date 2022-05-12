@@ -1,3 +1,3 @@
 make
-sleep 2
-./fs-find partition.img
+sleep 3
+./fs-cat partition.img dir1/dir1.1/file2

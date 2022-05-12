@@ -18,7 +18,7 @@
 
 long inode_to_offset(struct fs *superblock, int inode_num);
 int is_inode_dir(struct ufs2_dinode * inode);
-int dps_printing(struct ufs2_dinode * inode, char * disk_offset, int depth, struct fs *superblock);
+int dps_find(struct ufs2_dinode * inode, char * disk_offset, struct fs *superblock, char * comp_string);
 
 int
 main(int argc, char *argv[])
@@ -51,7 +51,19 @@ main(int argc, char *argv[])
     superblock = (struct fs *) (disk_offset + SBLOCK_UFS2);
     root_inode = (struct ufs2_dinode *) (inode_to_offset(superblock, UFS_ROOTINO) + disk_offset);
 
-    dps_printing(root_inode, disk_offset, -1, superblock);
+
+    printf("Argv2 %s\n", argv[2]);
+    fflush(stdout);
+
+    int file_ino_num = dps_find(root_inode, disk_offset, superblock, argv[2]);
+
+    printf("Argv2 %s\n", argv[2]);
+    fflush(stdout);
+
+    struct ufs2_dinode *file_ino = (struct ufs2_dinode *)(inode_to_offset(superblock, file_ino_num) + disk_offset);
+
+    printf("Files Inode = %d\n", file_ino_num);
+    printf("file_ino->di_mtime %d\n", file_ino->di_ctime);
 }
 
 long
@@ -65,14 +77,28 @@ is_inode_dir(struct ufs2_dinode * inode){
 }
 
 int
-dps_printing(struct ufs2_dinode * inode, char * disk_offset, int depth, struct fs *superblock){
+dps_find(struct ufs2_dinode * inode, char * disk_offset, struct fs *superblock, char * comp_string){
     struct direct * root_dir, * temp_dir;
     struct ufs2_dinode * temp_inode;
+    char * temp_name;
     int temp_reclen;
 
-    depth += 2;
+    temp_name = strsep(&comp_string, "/");
+    if (temp_name == NULL){
+        return -1;
+    }
 
-    if (is_inode_dir(inode)){
+    printf("temp_name = %s\n", temp_name);
+
+    if (!is_inode_dir(inode)) {
+        char* next = strsep(&comp_string, "/");
+        if ((strcmp(temp_name, temp_dir->d_name) == 0) && (next == NULL)) {
+            return temp_dir->d_ino;
+        } else {
+            return -1;
+        }
+    }
+    else{
         root_dir = (struct direct *)((inode->di_db[0] * superblock->fs_fsize) + disk_offset);
         temp_reclen = root_dir->d_reclen;
 
@@ -81,16 +107,26 @@ dps_printing(struct ufs2_dinode * inode, char * disk_offset, int depth, struct f
             temp_dir = (struct direct *)((inode->di_db[0] * superblock->fs_fsize) + disk_offset + temp_reclen);
             temp_reclen += temp_dir->d_reclen;
 
+            printf("f1\n");
+            fflush(stdout);
+
             if ((strcmp(temp_dir->d_name,".") == 0) || (strcmp(temp_dir->d_name,"..") == 0)) {
                 continue;
             }
 
-            printf("%*s %s\n", depth, " ", temp_dir->d_name);
-            
-            temp_inode = (struct ufs2_dinode *) (inode_to_offset(superblock, temp_dir->d_ino) + disk_offset);
-            
-            dps_printing(temp_inode, disk_offset, depth, superblock);
-                        
+            printf("f2\n");
+            fflush(stdout);
+
+            if (strcmp(temp_name, temp_dir->d_name) == 0){
+                temp_inode = (struct ufs2_dinode *) (inode_to_offset(superblock, temp_dir->d_ino) + disk_offset);
+                dps_find(temp_inode, disk_offset, superblock, comp_string);
+            }  
+
+            printf("f3\n");
+            fflush(stdout);
+
+            printf("comp_string: %s\n", comp_string);
+            fflush(stdout); 
         }
     }
 }
